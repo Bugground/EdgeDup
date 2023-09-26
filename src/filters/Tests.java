@@ -172,6 +172,14 @@ public class Tests {
 		test_no_false_negatives(filter, num_entries);
 	}
 
+	// test we don't get any false negatives for bloom filter
+	static public void test23() {
+		int bits_per_entry = 11;
+		int num_entries = 1024;
+		Filter filter = new CountingBloomFilter(num_entries, bits_per_entry);
+		test_no_false_negatives(filter, num_entries);
+	}
+
 	// adds two entries to the end of the filter, causing an overflow
 	// checks this can be handled
 	static public void test4() {

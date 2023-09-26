@@ -9,8 +9,14 @@ public class BloomFilter extends Filter {
 
     Bitmap filter;
     long num_bits;
+
+
+
     long max_num_entries;
     long current_num_entries;
+
+
+
     long bits_per_entry;
     int num_hash_functions;
 
@@ -87,5 +93,13 @@ public class BloomFilter extends Filter {
 
     public double measure_num_bits_per_entry() {
         return (max_num_entries * bits_per_entry) / (double)current_num_entries;
+    }
+
+    public int getBits_per_entry() {
+        return Math.toIntExact(bits_per_entry);
+    }
+
+    public int getMax_num_entries() {
+        return Math.toIntExact(max_num_entries);
     }
 }
