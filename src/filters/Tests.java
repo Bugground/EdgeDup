@@ -180,6 +180,42 @@ public class Tests {
 		test_no_false_negatives(filter, num_entries);
 	}
 
+	/**
+	 * test the false positive rate of AutoExpanQuotientFilter
+	 */
+	static public void test24(){
+		AutoExpanQuotientFilter af = new AutoExpanQuotientFilter(0,26);
+		for(int i=1;i<=10000;i++){
+			af.insert(i,false);
+		}
+		int pos=0;
+		for(int i=10001;i<=20000;i++){
+			if(af.search(i)){
+				pos++;
+			}
+		}
+		System.out.println("Test AutoExpanQuotientFilter for false positive rate:"+ pos/10000.0);
+	}
+
+	/**
+	 * test the false positive rate of CountingBloomFilter
+	 */
+	static public void test25(){
+		CountingBloomFilter cf = new CountingBloomFilter(10240,23);
+		for(int i=1;i<=10000;i++){
+			cf.insert(i,false);
+		}
+		int pos=0;
+		for(int i=10001;i<=20000;i++){
+			if(cf.search(i)){
+				pos++;
+			}
+		}
+		System.out.println("Test CountingBloomFilter for false positive rate:"+ pos/10000.0);
+	}
+
+
+
 	// adds two entries to the end of the filter, causing an overflow
 	// checks this can be handled
 	static public void test4() {
