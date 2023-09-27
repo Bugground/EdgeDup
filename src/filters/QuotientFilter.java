@@ -26,6 +26,9 @@ public class QuotientFilter extends Filter {
 	double expansion_threshold;
 	long max_entries_before_expansion;
 	boolean expand_autonomously;
+
+
+	boolean contraction_autonomously;
 	boolean is_full;
 	
 	// statistics, computed in the compute_statistics method. method should be called before these are used
@@ -39,8 +42,8 @@ public class QuotientFilter extends Filter {
 	
 	
 	public QuotientFilter(int power_of_two, int bits_per_entry) {
-		power_of_two_size = power_of_two;
-		bitPerEntry = bits_per_entry; 
+		power_of_two_size = power_of_two; //address index bits
+		bitPerEntry = bits_per_entry;   //fingerprint plus 3 identification bits
 		fingerprintLength = bits_per_entry - 3;
 		long init_size = 1L << power_of_two;
 		
@@ -51,6 +54,7 @@ public class QuotientFilter extends Filter {
 		expansion_threshold = 0.8;
 		max_entries_before_expansion = (int) (init_size * expansion_threshold);
 		expand_autonomously = false;
+		contraction_autonomously = false;
 		is_full = false;
 		
 		original_fingerprint_size = fingerprintLength;
@@ -90,7 +94,15 @@ public class QuotientFilter extends Filter {
 	public void set_expand_autonomously(boolean val) {
 		expand_autonomously = val;
 	}
-	
+
+	public boolean isContraction_autonomously() {
+		return contraction_autonomously;
+	}
+
+	public void setContraction_autonomously(boolean contraction_autonomously) {
+		this.contraction_autonomously = contraction_autonomously;
+	}
+
 	Bitmap make_filter(long init_size, int bits_per_entry) {
 		return new QuickBitVectorWrapper(bits_per_entry,  init_size + num_extension_slots);
 	}
@@ -117,7 +129,11 @@ public class QuotientFilter extends Filter {
 		is_full = true;
 		return false;
 	}
-	
+
+	boolean contract(){
+		return false;
+	}
+
 	// measures the number of bits per entry for the filter 
 	public double measure_num_bits_per_entry() {
 		return measure_num_bits_per_entry(this, new ArrayList<QuotientFilter>());
@@ -724,6 +740,15 @@ public class QuotientFilter extends Filter {
 		if (success) {
 			num_existing_entries--;
 		}
+
+		if (contraction_autonomously && num_existing_entries <= max_entries_before_expansion/4) {
+			boolean contracted = contract();
+			if (contracted) {
+				num_expansions--;
+			}
+
+		}
+
 		return success; 
 	}
 
