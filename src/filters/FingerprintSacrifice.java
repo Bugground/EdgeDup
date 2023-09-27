@@ -9,7 +9,7 @@ public class FingerprintSacrifice extends QuotientFilter {
 		max_entries_before_expansion = (int)(Math.pow(2, power_of_two_size) * expansion_threshold);
 	}
 	
-	boolean expand() {
+	public boolean expand() {
 		
 		if (fingerprintLength == 0) {
 			is_full = true;
@@ -27,8 +27,8 @@ public class FingerprintSacrifice extends QuotientFilter {
 			long bucket_mask = pivot_bit << power_of_two_size;
 			long updated_bucket = bucket | bucket_mask;
 			long updated_fingerprint = fingerprint >> 1;
-			
-			/*System.out.println(bucket); 
+
+			/*System.out.println(bucket);
 			System.out.print("bucket1      : ");
 			print_int_in_binary( bucket, power_of_two_size);
 			System.out.print("fingerprint1 : ");
@@ -41,7 +41,7 @@ public class FingerprintSacrifice extends QuotientFilter {
 			print_int_in_binary((int) updated_fingerprint, fingerprintLength - 1);
 			System.out.println();
 			System.out.println();*/
-			
+
 			new_qf.insert(updated_fingerprint, (int)updated_bucket, false);
 		}
 		
@@ -57,6 +57,38 @@ public class FingerprintSacrifice extends QuotientFilter {
 		num_extension_slots += 2;
 		bitPerEntry--;
 		fingerprintLength--;
+		max_entries_before_expansion = (int)(Math.pow(2, power_of_two_size) * expansion_threshold);
+		return true;
+	}
+
+	public boolean contract(){
+		if(power_of_two_size == 0){
+			return false;
+		}
+
+		QuotientFilter new_qf = new QuotientFilter(power_of_two_size -1, bitPerEntry + 1);
+		Iterator it = new Iterator(this);
+
+		while (it.next()) {
+			long bucket = it.bucket_index;
+			long fingerprint = it.fingerprint;
+			long bucket_mask = 1<<(power_of_two_size-1);
+			long bucket_most_sign = bucket >> (power_of_two_size-1);
+			long updated_bucket = bucket&~bucket_mask;
+			long updated_fingerprint = (fingerprint << 1)|bucket_most_sign;
+
+			new_qf.insert(updated_fingerprint, (int)updated_bucket, false);
+		}
+
+		last_empty_slot = new_qf.last_empty_slot;
+		last_cluster_start = new_qf.last_cluster_start;
+		backward_steps = new_qf.backward_steps;
+
+		filter = new_qf.filter;
+		power_of_two_size--;
+		num_extension_slots -= 2;
+		bitPerEntry++;
+		fingerprintLength++;
 		max_entries_before_expansion = (int)(Math.pow(2, power_of_two_size) * expansion_threshold);
 		return true;
 	}
